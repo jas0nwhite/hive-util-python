@@ -21,6 +21,6 @@ class Timer(object):
             if self.__message is not None:
                 print(f'{self.__message}: ', end='')
             else:
-                print('Elapsed time: ')
+                print('Elapsed time: ', end='')
 
             print(f'{time.time() - self.__start_time:.6f} seconds', flush=True)
