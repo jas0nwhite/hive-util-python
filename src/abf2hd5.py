@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 '''
-lvm2hd5 -- converts LVM to HD5 for opm-MEG
+hive.abf2hd5 -- converts ABF to HDF5 for voltammetry
 
 @author:     Jason White
 
@@ -10,7 +10,7 @@ lvm2hd5 -- converts LVM to HD5 for opm-MEG
 @license:    AS IS
 
 @contact:    jas0nw@vtc.vt.edu
-@deffield    updated: 2019-05-16
+@deffield    updated: Updated
 '''
 
 from argparse import ArgumentParser
@@ -18,12 +18,12 @@ from argparse import RawDescriptionHelpFormatter
 import os
 import sys
 
-from hive.convert.lvm2h5 import LVMConverter
+from hive.convert.abf2h5 import ABFConverter
 from hive.timer import Timer
 
 __all__ = []
-__version__ = 1.0
-__date__ = '2018-09-07'
+__version__ = 0.1
+__date__ = '2019-05-16'
 __updated__ = '2019-05-16'
 __verbose__ = 0
 
@@ -115,10 +115,13 @@ USAGE
         parser.add_argument('-o', '--output', type=str, nargs='?', dest='output', default=None,
                             help='output file, or directory for multiple input files [default: infile.h5]')
 
+        parser.add_argument('-c', '--channel', type=str, nargs='?', dest='channels', action='append',
+                            help='channel to convert: can be either number or ADC name [default: all]')
+
         parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                             help='overwrite existing output file(s)')
 
-        parser.add_argument(dest='paths', type=str, nargs='+', metavar='infile.lvm',
+        parser.add_argument(dest='paths', type=str, nargs='+', metavar='infile.abf',
                             help='paths to source file(s)')
 
         # Process arguments
@@ -128,6 +131,7 @@ USAGE
         __verbose__ = args.verbose
         overwrite = args.overwrite
         output = args.output
+        channels = args.channels
 
         if not __check_output_arg(paths, output):
             return 1
@@ -136,7 +140,7 @@ USAGE
             __log('Overwrite mode on')
 
         for inpath in paths:
-            converter = LVMConverter(inpath, output_file=output,
+            converter = ABFConverter(inpath, output_file=output, channel_select=channels,
                                      verbose=(__verbose__ > 1))
 
             if __check_output_file(paths, converter.output_file, overwrite):
@@ -149,7 +153,6 @@ USAGE
         if len(paths) > 1:
             __log('*** DONE ***')
         return 0
-
     except KeyboardInterrupt:
         print('*** INTERRUPT ***')
         return 0
