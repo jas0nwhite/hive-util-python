@@ -18,7 +18,7 @@ from argparse import RawDescriptionHelpFormatter
 import os
 import sys
 
-from hive.opm_meg.LVMConverter import LVMConverter
+from hive.convert.lvm2h5 import LVMConverter
 from hive.timer import Timer
 
 __all__ = []

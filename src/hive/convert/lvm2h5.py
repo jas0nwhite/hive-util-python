@@ -8,7 +8,7 @@ Converter for opm-MEG LVM files to H5 databases
 """
 from dfply import *  # @UnusedWildImport
 
-from hive.FileConverter import FileConverter
+from hive.convert.base import FileConverter
 from hive.timer import Timer
 
 

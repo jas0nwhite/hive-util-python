@@ -11,7 +11,7 @@ from dfply import *  # @UnusedWildImport
 import pyabf
 import h5py
 
-from hive.FileConverter import FileConverter
+from hive.convert.base import FileConverter
 from hive.timer import Timer
 
 
