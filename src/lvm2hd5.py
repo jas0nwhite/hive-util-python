@@ -21,7 +21,6 @@ import sys
 from hive.opm_meg.LVMConverter import LVMConverter
 from hive.timer import Timer
 
-
 __all__ = []
 __version__ = 1.0
 __date__ = '2018-09-07'
@@ -91,7 +90,7 @@ def main(argv=None):  # IGNORE:C0111
     program_license = '''%s
 
   Created by Jason White on %s.
-  Copyright 2018 VTCRI. All rights reserved.
+  Copyright 2019 FBRI. All rights reserved.
 
   Licensed under the Apache License 2.0
   http://www.apache.org/licenses/LICENSE-2.0
