@@ -27,11 +27,14 @@ class ABFConverter(FileConverter):
             defaults to all channels
         @param verbose: boolean governing output verbosity
         """
+        if channel_select is None:
+            channel_select = []
+
         self.__channel_select = channel_select
 
         # see if channel_select contains adcNames or channelNumbers
         try:
-            [int(x) for x in self.channel_select]
+            [int(x) for x in channel_select]
         except ValueError:
             self.__use_channel_numbers = False
         else:
@@ -97,7 +100,10 @@ class ABFConverter(FileConverter):
                     hdr.attrs['sampleFreq'] = sample_freq
                     hdr.attrs['sweepFreq'] = sweep_freq
 
-                    f.create_dataset('sweepTimes', data=sweep_times, compression=5)
+                    f.create_dataset(
+                        name='sweepTimes',
+                        data=sweep_times,
+                        compression=5)
 
                     data_grp = f.create_group('data')
 
@@ -107,4 +113,7 @@ class ABFConverter(FileConverter):
                     ch_name = abf.adcNames[chan]
 
                     with Timer(f'\twrote {ch_name}', verbose=self.verbose):
-                        data_grp.create_dataset(ch_name, data=ch_data, compression=5)
+                        data_grp.create_dataset(
+                            name=ch_name,
+                            data=ch_data,
+                            compression=5)
