@@ -6,6 +6,7 @@ Created on May 15, 2019
 Converter for voltammetry ABF (Axon binary format) files
 '''
 from pathlib import Path
+from datetime import datetime, time
 
 from dfply import *  # @UnusedWildImport
 import pyabf
@@ -17,13 +18,15 @@ from hive.timer import Timer
 
 class ABFConverter(FileConverter):
 
-    def __init__(self, input_file, output_file=None, channel_select=[], verbose=False):
+    def __init__(self, input_file,
+                 output_file=None, channel_select=[], verbose=False):
         """
         Constructs a new LVMConverter
         @param input_file: the input file path
         @param output_file: the output file path
             defaults to input file with extension replaced with .h5
-        @param channel_select: either a list of channel numbers or a list of adc names to convert
+        @param channel_select: either a list of channel numbers or a list of adc
+            names to convert
             defaults to all channels
         @param verbose: boolean governing output verbosity
         """
@@ -71,7 +74,9 @@ class ABFConverter(FileConverter):
             else:
                 # less-simple: find numeric indices in adcNames
                 try:
-                    channels_to_convert = [abf.adcNames.index(s) for s in self.channel_select]
+                    channels_to_convert = [
+                        abf.adcNames.index(s) for s in self.channel_select
+                    ]
                 except ValueError as err:
                     if not err.args:
                         err.args = ('',)
@@ -86,6 +91,32 @@ class ABFConverter(FileConverter):
             sample_freq = abf.dataRate
             sweep_freq = sample_freq / sweep_samples
             sweep_times = abf.sweepTimesSec
+            abf_timestamp = abf.abfDateTime.timestamp()
+
+            #
+            # required header fields for compatibility with Matlab's abfload()
+            #
+
+            # recTime: recording start and stop time in seconds from
+            # midnight (millisecond resolution)
+            _start_sec = (
+                abf.abfDateTime -
+                datetime.combine(
+                    abf.abfDateTime.date(),
+                    time(0, 0, 0))
+            ).total_seconds()
+            _end_sec = _start_sec + (sweep_count / sweep_freq)
+            rec_time = [_start_sec, _end_sec]
+
+            # si: sampling interval
+            si = 1 / sample_freq
+
+            # recChNames: the names of all channels, e.g. 'IN 8',...
+            recChNames = [abf.adcNames[i] for i in channels_to_convert]
+
+            # sweepStartInPts: the start times of sweeps in sample points
+            # (from beginning of recording)
+            sweepStartInPts = abf.sweepTimesSec * abf.dataRate
 
         #=========================================================================
         # write data to H5 file
@@ -99,21 +130,33 @@ class ABFConverter(FileConverter):
                     hdr.attrs['sweepSampleCount'] = sweep_samples
                     hdr.attrs['sampleFreq'] = sample_freq
                     hdr.attrs['sweepFreq'] = sweep_freq
+                    hdr.attrs['abfTimestamp'] = abf_timestamp
+                    hdr.attrs['recTime'] = rec_time
+                    hdr.attrs['si'] = si / 1e-6
+                    hdr.attrs['recChNames'] = recChNames
 
                     f.create_dataset(
-                        name='sweepTimes',
+                        name='header/sweepTimes',
                         data=sweep_times,
                         compression=5)
 
-                    data_grp = f.create_group('data')
+                    f.create_dataset(
+                        name='header/sweepStartInPts',
+                        data=sweepStartInPts,
+                        compression=5)
 
-                # ...and a table for each channel
-                for chan in channels_to_convert:
-                    ch_data = abf.data[chan].reshape(sweep_count, sweep_samples).T
-                    ch_name = abf.adcNames[chan]
+                data = np.zeros(shape=(
+                    sweep_samples,
+                    len(channels_to_convert),
+                    sweep_count))
 
-                    with Timer(f'\twrote {ch_name}', verbose=self.verbose):
-                        data_grp.create_dataset(
-                            name=ch_name,
-                            data=ch_data,
+                for ix, c in enumerate(channels_to_convert):
+                    data[:, ix, :] = abf.data[c].reshape(
+                        sweep_count,
+                        sweep_samples).T
+
+                with Timer('\twrote data', verbose=self.verbose):
+                        f.create_dataset(
+                            name='data',
+                            data=data,
                             compression=5)
