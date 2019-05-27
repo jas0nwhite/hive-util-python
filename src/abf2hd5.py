@@ -16,7 +16,9 @@ hive.abf2hd5 -- converts ABF to HDF5 for voltammetry
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 import os
+from pathlib import Path
 import sys
+import traceback
 
 from hive.convert.abf2h5 import ABFConverter
 from hive.timer import Timer
@@ -67,9 +69,14 @@ def __check_output_arg(paths, output):
     return True
 
 
-def __log(message, level=1):
+def __log(message, test=None):
     global __verbose__
-    if __verbose__ >= level:
+
+    # default to logging when verbose
+    if test is None:
+        test = (__verbose__ > 0)
+
+    if test:
         print(message, flush=True)
 
 
@@ -140,15 +147,21 @@ USAGE
             __log('Overwrite mode on')
 
         for inpath in paths:
-            converter = ABFConverter(inpath, output_file=output, channel_select=channels,
-                                     verbose=(__verbose__ > 1))
+            converter = ABFConverter(
+                inpath,
+                output_file=output,
+                channel_select=channels,
+                verbose=(__verbose__ > 1))
+
+            src_file = Path(converter.input_file).name
+            dst_file = Path(converter.output_file).name
 
             if __check_output_file(paths, converter.output_file, overwrite):
-                __log(f'{converter.input_file} -> {converter.output_file}')
-                with Timer(f'{converter.input_file} -> {converter.output_file}', (__verbose__ > 0)):
+                __log(f'{src_file} -> {dst_file}', (__verbose__ == 1))
+                with Timer(f'{src_file} -> {dst_file}', (__verbose__ > 1)):
                     converter.process()
             else:
-                __log(f'{converter.input_file} -> *** SKIP ***')
+                __log(f'{src_file} -> *** SKIP ***')
 
         if len(paths) > 1:
             __log('*** DONE ***')
@@ -166,6 +179,7 @@ USAGE
     except Exception as e:
         indent = len(program_name) * ' '
         sys.stderr.write(program_name + ': ' + repr(e) + '\n')
+        traceback.print_exc()
         sys.stderr.write(indent + '  for help use --help\n')
         return 2
 
