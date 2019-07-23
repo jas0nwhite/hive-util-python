@@ -31,7 +31,7 @@ __verbose__ = 0
 
 
 class CLIError(Exception):
-    '''Generic exception to raise and log different fatal errors.'''
+    """Generic exception to raise and log different fatal errors."""
 
     def __init__(self, msg):
         super(CLIError).__init__(type(self))
@@ -80,14 +80,15 @@ def __log(message, test=None):
         print(message, flush=True)
 
 
-def main(argv=None):  # IGNORE:C0111
-    '''Command line options.'''
+def main(_argv=None):  # IGNORE:C0111
+    """Command line options."""
     global __verbose__
 
-    if argv is None:
-        argv = sys.argv
+    if _argv is None:
+        # argv = sys.argv
+        pass
     else:
-        sys.argv.extend(argv)
+        sys.argv.extend(_argv)
 
     program_name = os.path.basename(sys.argv[0])
     program_version = 'v%s' % __version__
