@@ -8,14 +8,11 @@ Reporting utiltiy for voltammetry ABF (Axon binary format) files
 
 from pathlib import Path
 from datetime import datetime, time
-
+from typing import List
 from dfply import *  # @UnusedWildImport
 import pyabf
 
 import os
-
-from hive.convert.base import FileConverter
-from hive.timer import Timer
 
 
 class ABFReporter:
@@ -36,11 +33,11 @@ class ABFReporter:
         self.__filePattern = file_pattern
         self.__recurse = recurse
         self.__inputFileList = []
-        self.__abfHeaderList: list[pyabf.ABF] = []
+        self.__abfHeaderList: List[pyabf.ABF] = []
         self.__dataFrame = pd.DataFrame()
 
     @property
-    def inputPath(self):
+    def input_path(self):
         return self.__inputPath
 
     @property
@@ -48,23 +45,23 @@ class ABFReporter:
         return self.__recurse
 
     @property
-    def filePattern(self):
+    def file_pattern(self):
         return self.__filePattern
 
     @property
-    def inputFileList(self):
+    def input_file_list(self):
         return self.__inputFileList
 
     @property
-    def abfHeaderList(self):
+    def abf_header_list(self):
         return self.__abfHeaderList
 
     @property
-    def dataFrame(self):
+    def data_frame(self):
         return self.__dataFrame
 
-    def __buildFileList(self):
-        input_path = self.inputPath.resolve()
+    def __build_file_list(self):
+        input_path = self.input_path.resolve()
 
         if not input_path.exists():
             raise FileNotFoundError(input_path)
@@ -72,26 +69,26 @@ class ABFReporter:
         if input_path.is_dir():
             if self.recurse:
                 file_list = sorted(
-                    list(input_path.glob('**/' + self.filePattern)),
+                    list(input_path.glob('**/' + self.file_pattern)),
                     key=lambda f: os.path.getmtime(f))
             else:
                 file_list = sorted(
-                    list(input_path.glob(self.filePattern)),
+                    list(input_path.glob(self.file_pattern)),
                     key=lambda f: os.path.getmtime(f))
         else:
-            file_list = [self.inputPath]
+            file_list = [self.input_path]
 
         self.__inputFileList = file_list
 
-    def __readAbfHeaders(self):
+    def __read_abf_headers(self):
         abf_header_list = [
             pyabf.ABF(str(file), loadData=False)
-            for file in self.inputFileList
+            for file in self.input_file_list
         ]
 
         self.__abfHeaderList = abf_header_list
 
-    def __makeRow(self, abf: pyabf.ABF, ch: int):
+    def __make_row(self, abf: pyabf.ABF, ch: int):
         adc_ch = abf._adcSection.nADCNum[ch]
 
         sweep_count = abf.sweepCount
@@ -156,9 +153,9 @@ class ABFReporter:
             "forcingFn": forcing_fn
         }
 
-    def __makeRowList(self):
+    def __make_row_list(self):
         self.__row_list = [
-            self.__makeRow(abf, ch)
+            self.__make_row(abf, ch)
             for abf in self.__abfHeaderList
             for ch in abf.channelList if ch % 2 == 0
                                          and "fscv" in abf.adcNames[ch].lower()
@@ -166,9 +163,9 @@ class ABFReporter:
 
     def process(self):
 
-        self.__buildFileList()
-        self.__readAbfHeaders()
-        self.__makeRowList()
+        self.__build_file_list()
+        self.__read_abf_headers()
+        self.__make_row_list()
 
         df = (
                 pd.DataFrame(self.__row_list) >>

@@ -16,7 +16,7 @@ class ReporterTest(unittest.TestCase):
             self.home / '2019_07_09_DA_NE_pH76_XXX_MMP001_2ch' / '2019_07_09_DA_NE_pH76_XXX_MMP001_2ch_0000.abf')
         results = ABFReporter(file) \
             .process() \
-            .dataFrame
+            .data_frame
 
         assert isinstance(results, pd.DataFrame), "file list should be a list"
         assert results.shape[0] == 1 * 2
@@ -25,7 +25,7 @@ class ReporterTest(unittest.TestCase):
         file = str(self.home / '2019_05_23_rodentB_triangle_01_CFR003')
         results = ABFReporter(file) \
             .process() \
-            .dataFrame
+            .data_frame
 
         assert isinstance(results, pd.DataFrame), "file list should be a list"
         assert results.shape[0] == 5 * 1
@@ -34,7 +34,7 @@ class ReporterTest(unittest.TestCase):
         file = str(self.home)
         results = ABFReporter(file, file_pattern="2019_07_01_chara*.abf", recurse=True) \
             .process() \
-            .dataFrame
+            .data_frame
 
         assert isinstance(results, pd.DataFrame), "file list should be a list"
         assert results.shape[0] == 6 * 2
@@ -50,17 +50,18 @@ class ReporterTest(unittest.TestCase):
         file = str(self.home / '2018_12_05_PT004')
         results = ABFReporter(file) \
             .process() \
-            .dataFrame
+            .data_frame
 
         assert isinstance(results, pd.DataFrame), "file list should be a list"
         assert results.shape[0] == 9 * 2
 
+    @pytest.mark.skip
     def test_for_all(self):
         file = self.home
 
         results = ABFReporter(file, file_pattern="**/20*.abf") \
             .process() \
-            .dataFrame
+            .data_frame
 
         results.to_csv(self.home / "census.csv", float_format='%0.1f', index=False)
 
