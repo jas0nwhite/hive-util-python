@@ -18,7 +18,7 @@ class ReporterTest(unittest.TestCase):
             .process() \
             .data_frame
 
-        assert isinstance(results, pd.DataFrame), "file list should be a list"
+        assert isinstance(results, pd.DataFrame), 'results should be a DataFrame'
         assert results.shape[0] == 1 * 2
 
     def test_flat_dir(self):
@@ -27,7 +27,7 @@ class ReporterTest(unittest.TestCase):
             .process() \
             .data_frame
 
-        assert isinstance(results, pd.DataFrame), "file list should be a list"
+        assert isinstance(results, pd.DataFrame), 'results should be a DataFrame'
         assert results.shape[0] == 5 * 1
 
     def test_recursive_dir(self):
@@ -36,7 +36,7 @@ class ReporterTest(unittest.TestCase):
             .process() \
             .data_frame
 
-        assert isinstance(results, pd.DataFrame), "file list should be a list"
+        assert isinstance(results, pd.DataFrame), 'results should be a DataFrame'
         assert results.shape[0] == 6 * 2
 
     def test_nonexistant_file(self):
@@ -46,13 +46,22 @@ class ReporterTest(unittest.TestCase):
             ABFReporter(file) \
                 .process()
 
+    def test_empty_dir(self):
+        file = '.'
+        results = ABFReporter(file) \
+            .process() \
+            .data_frame
+        
+        assert isinstance(results, pd.DataFrame), 'results should be a DataFrame'
+        assert results.shape == (0, 0)
+
     def test_TTL_IN_looks_like_second_headstage(self):
         file = str(self.home / '2018_12_05_PT004')
         results = ABFReporter(file) \
             .process() \
             .data_frame
 
-        assert isinstance(results, pd.DataFrame), "file list should be a list"
+        assert isinstance(results, pd.DataFrame), 'results should be a DataFrame'
         assert results.shape[0] == 9 * 2
 
     @pytest.mark.skip

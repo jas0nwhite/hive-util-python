@@ -167,26 +167,29 @@ class ABFReporter:
         self.__read_abf_headers()
         self.__make_row_list()
 
-        df = (
-                pd.DataFrame(self.__row_list) >>
-                select(
-                    X.dir,
-                    X.file,
-                    X.date,
-                    X.protocol,
-                    X.samples,
-                    X.sweeps,
-                    X.sweepFreq_Hz,
-                    X.sampleFreq_kHz,
-                    X.recTime_sec,
-                    X.currentCh,
-                    X.currentNm,
-                    X.voltageCh,
-                    X.voltageNm,
-                    X.headstage,
-                    X.forcingFn) >>
-                arrange(X.date, X.headstage)
-        )
+        if len(self.__row_list) == 0:
+            df = pd.DataFrame()
+        else:
+            df = (
+                    pd.DataFrame(self.__row_list) >>
+                    select(
+                        X.dir,
+                        X.file,
+                        X.date,
+                        X.protocol,
+                        X.samples,
+                        X.sweeps,
+                        X.sweepFreq_Hz,
+                        X.sampleFreq_kHz,
+                        X.recTime_sec,
+                        X.currentCh,
+                        X.currentNm,
+                        X.voltageCh,
+                        X.voltageNm,
+                        X.headstage,
+                        X.forcingFn) >>
+                    arrange(X.date, X.headstage)
+            )
 
         self.__dataFrame = df
 
