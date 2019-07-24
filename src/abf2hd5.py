@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-'''
-hive.abf2hd5 -- converts ABF to HDF5 for voltammetry
+"""
+abf2hd5 -- converts ABF to HDF5 for voltammetry
 
 @author:     Jason White
 
@@ -11,7 +11,7 @@ hive.abf2hd5 -- converts ABF to HDF5 for voltammetry
 
 @contact:    jas0nw@vtc.vt.edu
 @deffield    updated: Updated
-'''
+"""
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
@@ -24,9 +24,9 @@ from hive.convert.abf2h5 import ABFConverter
 from hive.timer import Timer
 
 __all__ = []
-__version__ = 0.1
+__version__ = 1.0
 __date__ = '2019-05-16'
-__updated__ = '2019-05-16'
+__updated__ = '2019-07-24'
 __verbose__ = 0
 
 
@@ -121,15 +121,15 @@ USAGE
                             version=program_version_message)
 
         parser.add_argument('-o', '--output', type=str, nargs='?', dest='output', default=None,
-                            help='output file, or directory for multiple input files [default: infile.h5]')
+                            help='output file, or directory for multiple input files [default: FILE.h5]')
 
-        parser.add_argument('-c', '--channel', type=str, nargs='?', dest='channels', action='append',
+        parser.add_argument('-c', '--channel', type=str, nargs='?', dest='channels', action='append', metavar="CHANNEL",
                             help='channel to convert: can be either number or ADC name [default: all]')
 
         parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                             help='overwrite existing output file(s)')
 
-        parser.add_argument(dest='paths', type=str, nargs='+', metavar='infile.abf',
+        parser.add_argument(dest='paths', type=str, nargs='+', metavar='FILE.abf',
                             help='paths to source file(s)')
 
         # Process arguments
