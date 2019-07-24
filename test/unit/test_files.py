@@ -25,9 +25,9 @@ class TestHeaderFile(unittest.TestCase):
 
         df = hdr.dataframe()
 
-        self.assertEqual(df.shape, (2, 10))
+        assert df.shape == (2, 10)
 
-        self.assertEqual(df.columns.tolist(), [
+        assert df.columns.tolist() == [
             'Fs',
             'chan',
             'nSamples',
@@ -37,19 +37,17 @@ class TestHeaderFile(unittest.TestCase):
             'label',
             'chanType',
             'chanUnit',
-            'firstTimeStamp'])
+            'firstTimeStamp']
 
-        self.assertEqual(df['Fs'].tolist(), [1e5, 1e5])
-        self.assertEqual(df['chan'].tolist(), [0, 1])
-        self.assertEqual(df['nSamples'].tolist(), [1032, 1032])
-        self.assertEqual(df['nSamplesPre'].tolist(), [16, 16])
-        self.assertEqual(df['nSamplesPost'].tolist(), [16, 16])
-        self.assertEqual(df['label'].tolist(), ['FSCV_1', 'Cmd0'])
-        self.assertEqual(df['chanType'].tolist(), ['adc', 'adc'])
-        self.assertEqual(df['chanUnit'].tolist(), ['nA', 'V'])
-        self.assertEqual(
-            df['firstTimeStamp'].tolist(),
-            [hdr.first_time_stamp, hdr.first_time_stamp])
+        assert df['Fs'].tolist() == [1e5, 1e5]
+        assert df['chan'].tolist() == [0, 1]
+        assert df['nSamples'].tolist() == [1032, 1032]
+        assert df['nSamplesPre'].tolist() == [16, 16]
+        assert df['nSamplesPost'].tolist() == [16, 16]
+        assert df['label'].tolist() == ['FSCV_1', 'Cmd0']
+        assert df['chanType'].tolist() == ['adc', 'adc']
+        assert df['chanUnit'].tolist() == ['nA', 'V']
+        assert df['firstTimeStamp'].tolist() == [hdr.first_time_stamp, hdr.first_time_stamp]
 
 
 if __name__ == '__main__':
