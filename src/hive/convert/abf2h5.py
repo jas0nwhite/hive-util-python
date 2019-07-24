@@ -5,12 +5,13 @@ Created on May 15, 2019
 
 Converter for voltammetry ABF (Axon binary format) files
 """
-from pathlib import Path
+import shutil
 from datetime import datetime, time
+from pathlib import Path
 
-from dfply import *  # @UnusedWildImport
-import pyabf
 import h5py
+import pyabf
+from dfply import *
 
 from hive.convert.base import FileConverter
 from hive.timer import Timer
@@ -158,3 +159,7 @@ class ABFConverter(FileConverter):
                         name='data',
                         data=abf_data,
                         compression=5)
+
+            # copy permissions, times, etc. from original file
+            # NOTE: must be run outside of the "with h5py.File()" block so file is closed
+            shutil.copystat(self.input_file, self.output_file)
