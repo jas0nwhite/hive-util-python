@@ -70,13 +70,11 @@ class ABFConverter(FileConverter):
                 channels_to_convert = abf.channelList
             elif self.__use_channel_numbers:
                 # also simple: use supplied numeric list
-                channels_to_convert = self.channel_select
+                channels_to_convert = [int(i) for i in self.channel_select]
             else:
                 # less-simple: find numeric indices in adcNames
                 try:
-                    channels_to_convert = [
-                        abf.adcNames.index(s) for s in self.channel_select
-                    ]
+                    channels_to_convert = [abf.adcNames.index(s) for s in self.channel_select]
                 except ValueError as err:
                     if not err.args:
                         err.args = ('',)
