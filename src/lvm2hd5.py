@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-'''
-lvm2hd5 -- converts LVM to HD5 for opm-MEG
+"""
+lvm2hd5 -- converts LVM to HDF5 for opm-MEG
 
 @author:     Jason White
 
@@ -10,26 +10,28 @@ lvm2hd5 -- converts LVM to HD5 for opm-MEG
 @license:    AS IS
 
 @contact:    jas0nw@vtc.vt.edu
-@deffield    updated: 2019-05-16
-'''
+@deffield    updated: 2019-07-24
+"""
 
-from argparse import ArgumentParser
-from argparse import RawDescriptionHelpFormatter
 import os
 import sys
+import traceback
+from argparse import ArgumentParser
+from argparse import RawDescriptionHelpFormatter
+from pathlib import Path
 
 from hive.convert.lvm2h5 import LVMConverter
 from hive.timer import Timer
 
 __all__ = []
-__version__ = 1.0
+__version__ = 1.1
 __date__ = '2018-09-07'
-__updated__ = '2019-05-16'
+__updated__ = '2019-07-24'
 __verbose__ = 0
 
 
 class CLIError(Exception):
-    '''Generic exception to raise and log different fatal errors.'''
+    """Generic exception to raise and log different fatal errors."""
 
     def __init__(self, msg):
         super(CLIError).__init__(type(self))
@@ -61,26 +63,32 @@ def __check_output_arg(paths, output):
     if len(paths) > 1 and output is not None:
         # output argument must be a directory
         if not os.path.isdir(output):
-            raise(
+            raise (
                 CLIError(f'multiple input files: directory "{output}" does not exist'))
 
     return True
 
 
-def __log(message, level=1):
+def __log(message, test=None):
     global __verbose__
-    if __verbose__ >= level:
+
+    # default to logging when verbose
+    if test is None:
+        test = (__verbose__ > 0)
+
+    if test:
         print(message, flush=True)
 
 
-def main(argv=None):  # IGNORE:C0111
-    '''Command line options.'''
+def main(_argv=None):  # IGNORE:C0111
+    """Command line options."""
     global __verbose__
 
-    if argv is None:
-        argv = sys.argv
+    if _argv is None:
+        # argv = sys.argv
+        pass
     else:
-        sys.argv.extend(argv)
+        sys.argv.extend(_argv)
 
     program_name = os.path.basename(sys.argv[0])
     program_version = 'v%s' % __version__
@@ -113,12 +121,12 @@ USAGE
                             version=program_version_message)
 
         parser.add_argument('-o', '--output', type=str, nargs='?', dest='output', default=None,
-                            help='output file, or directory for multiple input files [default: infile.h5]')
+                            help='output file, or directory for multiple input files [default: FILE.h5]')
 
         parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                             help='overwrite existing output file(s)')
 
-        parser.add_argument(dest='paths', type=str, nargs='+', metavar='infile.lvm',
+        parser.add_argument(dest='paths', type=str, nargs='+', metavar='FILE.lvm',
                             help='paths to source file(s)')
 
         # Process arguments
@@ -136,15 +144,20 @@ USAGE
             __log('Overwrite mode on')
 
         for inpath in paths:
-            converter = LVMConverter(inpath, output_file=output,
-                                     verbose=(__verbose__ > 1))
+            converter = LVMConverter(
+                inpath,
+                output_file=output,
+                verbose=(__verbose__ > 1))
+
+            src_file = Path(converter.input_file).name
+            dst_file = Path(converter.output_file).name
 
             if __check_output_file(paths, converter.output_file, overwrite):
-                __log(f'{converter.input_file} -> {converter.output_file}')
-                with Timer(f'{converter.input_file} -> {converter.output_file}', (__verbose__ > 0)):
+                __log(f'{src_file} -> {dst_file}', (__verbose__ == 1))
+                with Timer(f'{src_file} -> {dst_file}', (__verbose__ > 1)):
                     converter.process()
             else:
-                __log(f'{converter.input_file} -> *** SKIP ***')
+                __log(f'{src_file} -> *** SKIP ***')
 
         if len(paths) > 1:
             __log('*** DONE ***')
@@ -163,6 +176,7 @@ USAGE
     except Exception as e:
         indent = len(program_name) * ' '
         sys.stderr.write(program_name + ': ' + repr(e) + '\n')
+        traceback.print_exc()
         sys.stderr.write(indent + '  for help use --help\n')
         return 2
 

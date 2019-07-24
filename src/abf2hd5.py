@@ -10,15 +10,15 @@ abf2hd5 -- converts ABF to HDF5 for voltammetry
 @license:    AS IS
 
 @contact:    jas0nw@vtc.vt.edu
-@deffield    updated: Updated
+@deffield    updated: 2019-07-24
 """
 
-from argparse import ArgumentParser
-from argparse import RawDescriptionHelpFormatter
 import os
-from pathlib import Path
 import sys
 import traceback
+from argparse import ArgumentParser
+from argparse import RawDescriptionHelpFormatter
+from pathlib import Path
 
 from hive.convert.abf2h5 import ABFConverter
 from hive.timer import Timer
@@ -63,7 +63,7 @@ def __check_output_arg(paths, output):
     if len(paths) > 1 and output is not None:
         # output argument must be a directory
         if not os.path.isdir(output):
-            raise(
+            raise (
                 CLIError(f'multiple input files: directory "{output}" does not exist'))
 
     return True
@@ -167,6 +167,7 @@ USAGE
         if len(paths) > 1:
             __log('*** DONE ***')
         return 0
+
     except KeyboardInterrupt:
         print('*** INTERRUPT ***')
         return 0
