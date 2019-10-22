@@ -92,7 +92,7 @@ class LVMConverter(FileConverter):
                     mutate(frame=row_number(X.X_Value)) >>
                     mutate(frame=self._as_int(X.frame)) >>
                     drop(X.Comment) >>
-                    gather('name', 'Y_Value', starts_with('cDAQ')) >>
+                    gather('name', 'Y_Value', starts_with('Input')) >>
                     inner_join(channels, by='name') >>
                     mutate(time=X.X_Value + X.offset) >>
                     select(X.channel, X.frame, X.time, X.Y_Value)
