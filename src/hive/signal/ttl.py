@@ -1,10 +1,10 @@
-'''
+"""
 Routines for ttl signal processing
 
 Created on Oct 16, 2018
 
 @author: jwhite
-'''
+"""
 
 from dfply import *  # @UnusedWildImport
 

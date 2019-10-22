@@ -39,14 +39,15 @@ class ReporterTest(unittest.TestCase):
         assert isinstance(results, pd.DataFrame), 'results should be a DataFrame'
         assert results.shape[0] == 6 * 2
 
-    def test_nonexistant_file(self):
+    def test_nonexistent_file(self):
         file = str(self.home / "THIS_DOES_NOT_EXIST")
 
         with pytest.raises(FileNotFoundError):
             ABFReporter(file) \
                 .process()
 
-    def test_empty_dir(self):
+    @staticmethod
+    def test_empty_dir():
         file = '.'
         results = ABFReporter(file) \
             .process() \

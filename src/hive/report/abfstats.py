@@ -3,16 +3,16 @@ Created on July 22, 2019
 
 @author: jwhite
 
-Reporting utiltiy for voltammetry ABF (Axon binary format) files
+Reporting utility for voltammetry ABF (Axon binary format) files
 """
 
-from pathlib import Path
-from datetime import datetime, time
-from typing import List
-from dfply import *  # @UnusedWildImport
-import pyabf
-
 import os
+from datetime import datetime, time
+from pathlib import Path
+from typing import List
+
+import pyabf
+from dfply import *  # @UnusedWildImport
 
 
 class ABFReporter:
@@ -89,6 +89,7 @@ class ABFReporter:
         self.__abfHeaderList = abf_header_list
 
     def __make_row(self, abf: pyabf.ABF, ch: int):
+        # noinspection PyProtectedMember
         adc_ch = abf._adcSection.nADCNum[ch]
 
         sweep_count = abf.sweepCount
@@ -121,15 +122,19 @@ class ABFReporter:
             voltage_name = ''
 
         dac_ch = int(ch / 2)
+        # noinspection PyProtectedMember
         wave_src = abf._dacSection.nWaveformSource[dac_ch]
 
         if wave_src == 2:  # ABF_DACFILEWAVEFORM
+            # noinspection PyProtectedMember
             forcing_fn = Path(abf._stringsIndexed.lDACFilePath[dac_ch].replace('\\', '/')).name
         elif wave_src == 1:  # ABF_EPOCHTABLEWAVEFORM
             #
             # TODO: investigate possible bug?
             #
+            # noinspection PyProtectedMember
             epd_ch = min(dac_ch, len(abf._epochPerDacSection.nEpochType) - 1)
+            # noinspection PyProtectedMember
             epoch_type = abf._epochPerDacSection.nEpochType[epd_ch]
             forcing_fn = self.__epoch_type[epoch_type]
         else:
@@ -157,8 +162,7 @@ class ABFReporter:
         self.__row_list = [
             self.__make_row(abf, ch)
             for abf in self.__abfHeaderList
-            for ch in abf.channelList if ch % 2 == 0
-                                         and "fscv" in abf.adcNames[ch].lower()
+            for ch in abf.channelList if ch % 2 == 0 and "fscv" in abf.adcNames[ch].lower()
         ]
 
     def process(self):

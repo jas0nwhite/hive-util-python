@@ -6,7 +6,8 @@ import hive.files as hf
 
 class TestHeaderFile(unittest.TestCase):
 
-    def _get_test_header(self):
+    @staticmethod
+    def _get_test_header():
         hdr = hf.HeaderFile()
         hdr.fs = 1e5
         hdr.n_chans = 2

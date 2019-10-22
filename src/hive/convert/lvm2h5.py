@@ -51,9 +51,9 @@ class LVMConverter(FileConverter):
                     mask(X.Samples > 0) >>
                     mutate(channel=X.channel - colmin(X.channel)) >>
                     mutate(offset=(X.Time - colmin(X.Time)) / seconds) >>
-                    mutate(start=self.__combine_date_time(X.Date, X.Time)) >>
-                    mutate(name=self.__as_string(X.channel, format_string='ch{:03d}')) >>
-                    mutate(Samples=self.__as_int(X.Samples)) >>
+                    mutate(start=self._combine_date_time(X.Date, X.Time)) >>
+                    mutate(name=self._as_string(X.channel, format_string='ch{:03d}')) >>
+                    mutate(Samples=self._as_int(X.Samples)) >>
                     select(
                         X.channel,
                         X.name,
@@ -86,10 +86,11 @@ class LVMConverter(FileConverter):
             )
 
             # here's where we re-arrange
+            # noinspection PyShadowingNames
             data = (
                     dat >>
                     mutate(frame=row_number(X.X_Value)) >>
-                    mutate(frame=self.__as_int(X.frame)) >>
+                    mutate(frame=self._as_int(X.frame)) >>
                     drop(X.Comment) >>
                     gather('name', 'Y_Value', starts_with('cDAQ')) >>
                     inner_join(channels, by='name') >>

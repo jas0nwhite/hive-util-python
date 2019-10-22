@@ -143,9 +143,9 @@ USAGE
         if overwrite:
             __log('Overwrite mode on')
 
-        for inpath in paths:
+        for in_path in paths:
             converter = LVMConverter(
-                inpath,
+                in_path,
                 output_file=output,
                 verbose=(__verbose__ > 1))
 

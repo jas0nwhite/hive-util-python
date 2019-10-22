@@ -147,9 +147,9 @@ USAGE
         if overwrite:
             __log('Overwrite mode on')
 
-        for inpath in paths:
+        for in_path in paths:
             converter = ABFConverter(
-                inpath,
+                in_path,
                 output_file=output,
                 channel_select=channels,
                 verbose=(__verbose__ > 1))

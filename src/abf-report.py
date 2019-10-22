@@ -123,7 +123,7 @@ USAGE
         _recurse = args.recurse
         _output = args.csv_file
 
-        __verbose__ = 1 # args.verbose
+        __verbose__ = 1  # args.verbose
 
         converter = ABFReporter(
             input_path=_input,
