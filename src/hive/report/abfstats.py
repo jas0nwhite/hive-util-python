@@ -7,6 +7,8 @@ Reporting utility for voltammetry ABF (Axon binary format) files
 """
 
 import os
+import sys
+import struct
 from datetime import datetime, time
 from pathlib import Path
 from typing import List
@@ -82,11 +84,21 @@ class ABFReporter:
 
     def __read_abf_headers(self):
         abf_header_list = [
-            pyabf.ABF(str(file), loadData=False)
+            self.__read_abf(file, False)
             for file in self.input_file_list
         ]
 
         self.__abfHeaderList = abf_header_list
+
+    @staticmethod
+    def __read_abf(file, load_data=False):
+        try:
+            abf = pyabf.ABF(str(file), loadData=load_data)
+        except struct.error:
+            print(f'*** ERROR while reading {file}')
+            abf = None
+
+        return abf
 
     def __make_row(self, abf: pyabf.ABF, ch: int):
         # noinspection PyProtectedMember
@@ -133,10 +145,14 @@ class ABFReporter:
             # TODO: investigate possible bug?
             #
             # noinspection PyProtectedMember
-            epd_ch = min(dac_ch, len(abf._epochPerDacSection.nEpochType) - 1)
-            # noinspection PyProtectedMember
-            epoch_type = abf._epochPerDacSection.nEpochType[epd_ch]
-            forcing_fn = self.__epoch_type[epoch_type]
+            epoch_types = abf._epochPerDacSection.nEpochType
+
+            if len(epoch_types) == 0:
+                forcing_fn = f''
+            else:
+                epd_ch = min(dac_ch, len(epoch_types) - 1)
+                epoch_type = epoch_types[epd_ch]
+                forcing_fn = self.__epoch_type[epoch_type]
         else:
             forcing_fn = f'unknown: {wave_src}'
 
@@ -161,7 +177,7 @@ class ABFReporter:
     def __make_row_list(self):
         self.__row_list = [
             self.__make_row(abf, ch)
-            for abf in self.__abfHeaderList
+            for abf in self.__abfHeaderList if abf
             for ch in abf.channelList if ch % 2 == 0 and "fscv" in abf.adcNames[ch].lower()
         ]
 

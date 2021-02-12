@@ -10,7 +10,7 @@ abf-report -- reports on ABF files
 @license:    AS IS
 
 @contact:    jas0nw@vtc.vt.edu
-@deffield    updated: 2019-07-23
+@deffield    updated: 2021-02-12
 """
 
 from argparse import ArgumentParser
@@ -23,9 +23,9 @@ import pandas as pd
 from hive.report.abfstats import ABFReporter
 
 __all__ = []
-__version__ = 0.1
+__version__ = 0.2
 __date__ = '2019-07-23'
-__updated__ = '2019-07-23'
+__updated__ = '2021-02-12'
 __verbose__ = 0
 
 

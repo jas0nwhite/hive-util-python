@@ -22,7 +22,7 @@ class ABFConverter(FileConverter):
     def __init__(self, input_file,
                  output_file=None, channel_select=None, verbose=False):
         """
-        Constructs a new LVMConverter
+        Constructs a new ABFConverter
         @param input_file: the input file path
         @param output_file: the output file path
             defaults to input file with extension replaced with .h5
