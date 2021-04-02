@@ -94,8 +94,8 @@ class ABFReporter:
     def __read_abf(file, load_data=False):
         try:
             abf = pyabf.ABF(str(file), loadData=load_data)
-        except struct.error:
-            print(f'*** ERROR while reading {file}')
+        except Exception as e:
+            print(f'*** {repr(e)} while reading {file}')
             abf = None
 
         return abf

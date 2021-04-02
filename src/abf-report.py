@@ -23,9 +23,9 @@ import pandas as pd
 from hive.report.abfstats import ABFReporter
 
 __all__ = []
-__version__ = 0.2
+__version__ = 0.3
 __date__ = '2019-07-23'
-__updated__ = '2021-02-12'
+__updated__ = '2021-04-02'
 __verbose__ = 0
 
 
