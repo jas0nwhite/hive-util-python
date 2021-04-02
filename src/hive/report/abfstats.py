@@ -7,8 +7,6 @@ Reporting utility for voltammetry ABF (Axon binary format) files
 """
 
 import os
-import sys
-import struct
 from datetime import datetime, time
 from pathlib import Path
 from typing import List
@@ -101,78 +99,98 @@ class ABFReporter:
         return abf
 
     def __make_row(self, abf: pyabf.ABF, ch: int):
-        # noinspection PyProtectedMember
-        adc_ch = abf._adcSection.nADCNum[ch]
-
-        sweep_count = abf.sweepCount
-        sweep_samples = abf.sweepPointCount
-        sample_freq = abf.dataRate
-        sweep_freq = sample_freq / sweep_samples
-
-        # recTime: recording start and stop time in seconds from
-        # midnight (millisecond resolution)
-        _start_sec = (
-                abf.abfDateTime -
-                datetime.combine(
-                    abf.abfDateTime.date(),
-                    time(0, 0, 0))
-        ).total_seconds()
-        _end_sec = _start_sec + (sweep_count / sweep_freq)
-
         # dir/file
         abf_path = Path(abf.abfFilePath.replace('\\', '/'))
 
-        # protocol
-        protocol_path = Path(abf.protocolPath.replace('\\', '/'))
-
-        # voltageCh
-        if adc_ch + 1 < len(abf.adcNames):
-            voltage_ch = int(adc_ch + 1)
-            voltage_name = abf.adcNames[voltage_ch]
-        else:
-            voltage_ch = -1
-            voltage_name = ''
-
-        dac_ch = int(ch / 2)
-        # noinspection PyProtectedMember
-        wave_src = abf._dacSection.nWaveformSource[dac_ch]
-
-        if wave_src == 2:  # ABF_DACFILEWAVEFORM
+        try:
             # noinspection PyProtectedMember
-            forcing_fn = Path(abf._stringsIndexed.lDACFilePath[dac_ch].replace('\\', '/')).name
-        elif wave_src == 1:  # ABF_EPOCHTABLEWAVEFORM
-            #
-            # TODO: investigate possible bug?
-            #
-            # noinspection PyProtectedMember
-            epoch_types = abf._epochPerDacSection.nEpochType
+            adc_ch = abf._adcSection.nADCNum[ch]
 
-            if len(epoch_types) == 0:
-                forcing_fn = f''
+            sweep_count = abf.sweepCount
+            sweep_samples = abf.sweepPointCount
+            sample_freq = abf.dataRate
+            sweep_freq = sample_freq / sweep_samples
+
+            # recTime: recording start and stop time in seconds from
+            # midnight (millisecond resolution)
+            _start_sec = (
+                    abf.abfDateTime -
+                    datetime.combine(
+                        abf.abfDateTime.date(),
+                        time(0, 0, 0))
+            ).total_seconds()
+            _end_sec = _start_sec + (sweep_count / sweep_freq)
+
+            # protocol
+            protocol_path = Path(abf.protocolPath.replace('\\', '/'))
+
+            # voltageCh
+            if adc_ch + 1 < len(abf.adcNames):
+                voltage_ch = int(adc_ch + 1)
+                voltage_name = abf.adcNames[voltage_ch]
             else:
-                epd_ch = min(dac_ch, len(epoch_types) - 1)
-                epoch_type = epoch_types[epd_ch]
-                forcing_fn = self.__epoch_type[epoch_type]
-        else:
-            forcing_fn = f'unknown: {wave_src}'
+                voltage_ch = -1
+                voltage_name = ''
 
-        return {
-            "dir": abf_path.parent.name,
-            "file": abf_path.name,
-            "date": abf.abfDateTime,
-            "protocol": protocol_path.name,
-            "samples": abf.sweepPointCount,
-            "sweeps": abf.sweepCount,
-            "sweepFreq_Hz": sweep_freq,
-            "sampleFreq_kHz": abf.dataRate / 1e3,
-            "recTime_sec": _end_sec - _start_sec,
-            "currentCh": adc_ch,
-            "currentNm": abf.adcNames[ch],
-            "voltageCh": voltage_ch,
-            "voltageNm": voltage_name,
-            "headstage": int(adc_ch / 2) + 1,
-            "forcingFn": forcing_fn
-        }
+            dac_ch = int(ch / 2)
+            # noinspection PyProtectedMember
+            wave_src = abf._dacSection.nWaveformSource[dac_ch]
+
+            if wave_src == 2:  # ABF_DACFILEWAVEFORM
+                # noinspection PyProtectedMember
+                forcing_fn = Path(abf._stringsIndexed.lDACFilePath[dac_ch].replace('\\', '/')).name
+            elif wave_src == 1:  # ABF_EPOCHTABLEWAVEFORM
+                #
+                # TODO: investigate possible bug?
+                #
+                # noinspection PyProtectedMember
+                epoch_types = abf._epochPerDacSection.nEpochType
+
+                if len(epoch_types) == 0:
+                    forcing_fn = f''
+                else:
+                    epd_ch = min(dac_ch, len(epoch_types) - 1)
+                    epoch_type = epoch_types[epd_ch]
+                    forcing_fn = self.__epoch_type[epoch_type]
+            else:
+                forcing_fn = f'unknown: {wave_src}'
+
+            return {
+                "dir": abf_path.parent.name,
+                "file": abf_path.name,
+                "date": abf.abfDateTime,
+                "protocol": protocol_path.name,
+                "samples": abf.sweepPointCount,
+                "sweeps": abf.sweepCount,
+                "sweepFreq_Hz": sweep_freq,
+                "sampleFreq_kHz": abf.dataRate / 1e3,
+                "recTime_sec": _end_sec - _start_sec,
+                "currentCh": adc_ch,
+                "currentNm": abf.adcNames[ch],
+                "voltageCh": voltage_ch,
+                "voltageNm": voltage_name,
+                "headstage": int(adc_ch / 2) + 1,
+                "forcingFn": forcing_fn
+            }
+        except Exception as e:
+            print(f'*** {repr(e)} while reading {abf_path}')
+            return {
+                "dir": abf_path.parent.name,
+                "file": abf_path.name,
+                "date": abf.abfDateTime,
+                "protocol": repr(e),
+                "samples": abf.sweepPointCount,
+                "sweeps": abf.sweepCount,
+                "sweepFreq_Hz": pd.NA,
+                "sampleFreq_kHz": abf.dataRate / 1e3,
+                "recTime_sec": pd.NA,
+                "currentCh": pd.NA,
+                "currentNm": pd.NA,
+                "voltageCh": pd.NA,
+                "voltageNm": pd.NA,
+                "headstage": pd.NA,
+                "forcingFn": pd.NA
+            }
 
     def __make_row_list(self):
         self.__row_list = [
