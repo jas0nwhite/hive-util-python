@@ -131,6 +131,22 @@ class ReporterTest(unittest.TestCase):
             assert pd.isna(results.at[0, 'headstage'])
             assert pd.isna(results.at[0, 'forcingFn'])
 
+    def test_channel_mismatch(self):
+        for err in ['error6.abf']:
+            file = str(self.data / 'errors' / err)
+            results = ABFReporter(file) \
+                .process() \
+                .data_frame
+
+        assert isinstance(results, pd.DataFrame), 'results should be a DataFrame'
+        assert results.shape[0] == 1
+        assert results.at[0, 'dir'] == 'errors'
+        assert results.at[0, 'file'] == err
+        assert results.at[0, 'currentCh'] == 2
+        assert results.at[0, 'currentNm'] == 'FSCV_2'
+        assert results.at[0, 'voltageCh'] == 3
+        assert results.at[0, 'voltageNm'] == 'Cmd_2'
+
     def test_error_tolerance(self):
         file = str(self.data / 'errors')
         results = ABFReporter(file) \

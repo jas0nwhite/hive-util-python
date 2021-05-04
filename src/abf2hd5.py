@@ -24,9 +24,9 @@ from hive.convert.abf2h5 import ABFConverter
 from hive.timer import Timer
 
 __all__ = []
-__version__ = 1.1
+__version__ = 1.2
 __date__ = '2019-05-16'
-__updated__ = '2019-07-24'
+__updated__ = '2021-05-04'
 __verbose__ = 0
 
 

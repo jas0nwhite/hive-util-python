@@ -104,7 +104,7 @@ class ABFReporter:
 
         try:
             # noinspection PyProtectedMember
-            adc_ch = abf._adcSection.nADCNum[ch]
+            current_ch = abf._adcSection.nADCNum[ch]
 
             sweep_count = abf.sweepCount
             sweep_samples = abf.sweepPointCount
@@ -125,9 +125,9 @@ class ABFReporter:
             protocol_path = Path(abf.protocolPath.replace('\\', '/'))
 
             # voltageCh
-            if adc_ch + 1 < len(abf.adcNames):
-                voltage_ch = int(adc_ch + 1)
-                voltage_name = abf.adcNames[voltage_ch]
+            if current_ch + 1 <= max(abf._adcSection.nADCNum):
+                voltage_ch = abf._adcSection.nADCNum[ch + 1]
+                voltage_name = abf.adcNames[ch + 1]
             else:
                 voltage_ch = -1
                 voltage_name = ''
@@ -165,11 +165,11 @@ class ABFReporter:
                 "sweepFreq_Hz": sweep_freq,
                 "sampleFreq_kHz": abf.dataRate / 1e3,
                 "recTime_sec": _end_sec - _start_sec,
-                "currentCh": adc_ch,
+                "currentCh": current_ch,
                 "currentNm": abf.adcNames[ch],
                 "voltageCh": voltage_ch,
                 "voltageNm": voltage_name,
-                "headstage": int(adc_ch / 2) + 1,
+                "headstage": int(current_ch / 2) + 1,
                 "forcingFn": forcing_fn
             }
         except Exception as e:
