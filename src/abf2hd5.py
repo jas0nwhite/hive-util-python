@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.6
 # encoding: utf-8
 """
 abf2hd5 -- converts ABF to HDF5 for voltammetry
@@ -24,9 +24,9 @@ from hive.convert.abf2h5 import ABFConverter
 from hive.timer import Timer
 
 __all__ = []
-__version__ = 1.2
+__version__ = 1.3
 __date__ = '2019-05-16'
-__updated__ = '2021-05-04'
+__updated__ = '2022-04-26'
 __verbose__ = 0
 
 

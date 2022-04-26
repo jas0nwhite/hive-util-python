@@ -82,6 +82,10 @@ class ABFConverter(FileConverter):
                     err.args = err.args + (f' {abf.adcNames}',)
                     raise
 
+            if self.verbose:
+                for ch in channels_to_convert:
+                    print(f'\tread channel #{ch}: {abf.adcNames[ch]}')
+
             # NOTE abfload returns data in nSamples x nChannels x nSweeps
 
             # now, we can read in the data
